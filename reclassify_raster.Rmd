@@ -49,7 +49,7 @@ plot(r_reclass, main = 'Reclassified Raster')
 
 # Plot Reclassified raster
 
-```{r plot}
+```{r plot_reclassified}
 plot(r_reclass, main = 'Classified Habitat Suitability Map', legend = F,
      col = c('red', 'blue', 'green', 'gray'),
      )
