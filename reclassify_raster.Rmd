@@ -63,11 +63,11 @@ legend('left', legend = c('Unsuitable', 'Moderate', 'Suitable', 'Very suitable')
 
 # Area under each class
 
-```{r}
+```{r calculate_area}
 class_area <- tapply(area(r_reclass), r_reclass[], sum)
 ```
 
-```{r message=FALSE}
+```{r area_bars, message=FALSE}
 library(dplyr)
 library(ggplot2)
 class_df <- as.data.frame(class_area)
