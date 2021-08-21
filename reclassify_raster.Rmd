@@ -1,0 +1,89 @@
+---
+title: "<center>Reclassify Raster in `R`</center>"
+author: "<center>Wyclife Agumba Oluoch wyclifeoluoch@gmail.com</center>"
+date: "<center>`r Sys.time()`</center>"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+
+bibliography: bib/packages.bib
+nocite: '@*'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::write_bib(c(.packages(),
+                   'base',
+                   'raster',
+                   'dplyr',
+                   'ggplot2',
+                   'knitr'), 'bib/packages.bib')
+```
+
+# Introduction
+
+I will create a raster object using `raster()` function in `raster` package, reclassify it into four discrete classes and then calculate area under each class.
+
+# Creating a raster object
+
+```{r create_raster, message=FALSE}
+library(raster)
+r <- raster(ncol = 10, nrow =10)
+r[] <- sample(1:ncell(r))
+plot(r, main = 'Raw Raster')
+```
+
+# Reclasify the raster
+
+My raster has values ranging from 1 to 100. So I will breake it into chunks of 1-25, 25-50, 50-75, and 75-100.
+
+```{r reclassify}
+r_reclass <- reclassify(r, c(1, 25, 0,
+                             25, 50, 1,
+                             50, 75, 2,
+                             75, 100, 3))
+plot(r_reclass, main = 'Reclassified Raster')
+```
+
+# Plot Reclassified raster
+
+```{r plot}
+plot(r_reclass, main = 'Classified Habitat Suitability Map', legend = F,
+     col = c('red', 'blue', 'green', 'gray'),
+     )
+legend('left', legend = c('Unsuitable', 'Moderate', 'Suitable', 'Very suitable'),
+       fill = c('red', 'blue', 'green', 'gray'),
+       border = FALSE,
+       bty = 'n',
+       xpd = T,horiz = F,
+       inset = c(0.99, 1))
+```
+
+# Area under each class
+
+```{r}
+class_area <- tapply(area(r_reclass), r_reclass[], sum)
+```
+
+```{r message=FALSE}
+library(dplyr)
+library(ggplot2)
+class_df <- as.data.frame(class_area)
+class_df |> mutate(class = c('Unsuitable',
+                             'Moderate',
+                             'Suitable',
+                             'Very suitable')) |> ggplot() + geom_col(aes(x = class, y = class_area), fill = c('red', 'blue', 'green', 'gray')) + labs(x = 'Suitability Class', y = 'Class area in km^2') +
+  theme_classic()
+```
+
+# Tabular area
+
+```{r table}
+class_table <- class_df |> mutate(Suitability_class = c('Unsuitable', 'Moderate','Suitable',
+'Very suitable')) |> relocate(Suitability_class, .before = class_area)
+knitr::kable(class_table, caption = 'Suitability classes by area in km^2')
+```
+
+# References
